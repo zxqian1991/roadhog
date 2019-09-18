@@ -20,7 +20,14 @@ function getConfig() {
     Object.keys(require.cache).forEach(file => {
       if (file === configFile || file.indexOf(mockDir) > -1) {
         debug(`delete cache ${file}`);
+        const mod = require.cache[file];
         delete require.cache[file];
+        if (mod && mod.parent && mod.parent.children) {
+          const index = mod.parent.children.indexOf(mod);
+          if (index >= 0) {
+            mod.parent.children.splice(index, 1);
+          }
+        }
       }
     });
     return require(configFile);
